@@ -186,6 +186,11 @@ define hookpost-forward
 maintenance flush register-cache
 frame
 end
+
+define hookpost-quick-seek-ticks
+maintenance flush register-cache
+maintenance flush dcache
+end
 )Delimiter");
 
   return ss.str();
