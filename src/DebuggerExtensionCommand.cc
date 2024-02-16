@@ -126,19 +126,23 @@ string invoke_checkpoint(GdbServer& gdb_server, Task*,
   }
   int checkpoint_id = ++gNextCheckpointId;
   GdbServer::Checkpoint::Explicit e;
-  if (gdb_server.timeline()->can_add_checkpoint()) {
-    e = GdbServer::Checkpoint::EXPLICIT;
-  } else {
+  bool lightweight = args.size() > 1 && args[1] == "lightweight";
+  if (lightweight || !gdb_server.timeline()->can_add_checkpoint()) {
     e = GdbServer::Checkpoint::NOT_EXPLICIT;
+  } else {
+    e = GdbServer::Checkpoint::EXPLICIT;
   }
   gdb_server.checkpoints[checkpoint_id] = GdbServer::Checkpoint(
       *gdb_server.timeline(), gdb_server.last_continue_task, e, where);
-  return string("Checkpoint ") + to_string(checkpoint_id) + " at " + where;
+  return string(lightweight ? "Lightweight checkpoint " : "Checkpoint ") +
+         to_string(checkpoint_id) + " at " + where;
 }
 static SimpleDebuggerExtensionCommand checkpoint(
   "checkpoint",
   "create a checkpoint representing a point in the execution\n"
-  "use the 'restart' command to return to the checkpoint",
+  "use the 'restart' command to return to the checkpoint\n"
+  "use 'checkpoint lightweight' to create a checkpoint that uses less "
+  "memory, at the cost of a slower 'restart'",
   invoke_checkpoint);
 
 string invoke_delete_checkpoint(GdbServer& gdb_server, Task*,
