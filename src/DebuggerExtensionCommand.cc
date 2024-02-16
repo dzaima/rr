@@ -115,6 +115,28 @@ static SimpleDebuggerExtensionCommand forward(
 
 static int gNextCheckpointId = 0;
 
+string quick_seek_ticks(GdbServer& gdb_server, Task* t,
+                         const vector<string>& args) {
+  if (!t->session().is_replaying()) {
+    return DebuggerExtensionCommandHandler::cmd_end_diversion();
+  }
+  if (args.size() < 1) {
+    return string("'quick-seek-ticks' requires an argument");
+  }
+  Ticks ticks = stoi(args[0]);
+  FrameTime time = gdb_server.compute_time_from_ticks(*gdb_server.timeline(), ticks);
+  if (time == -1) {
+    return string("No event found matching specified ticks target.");
+  } else {
+    gdb_server.timeline()->seek_to_ticks(time, ticks);
+    return string();
+  }
+}
+static SimpleDebuggerExtensionCommand quick_invoke_checkpoint_cmd(
+    "quick-seek-ticks",
+    "Go to a specific tick without refreshing state.",
+    quick_seek_ticks);
+
 string invoke_checkpoint(GdbServer& gdb_server, Task*,
                          const vector<string>& args) {
   if (!gdb_server.timeline()) {

@@ -28,6 +28,8 @@ class GdbServer {
                                        const std::vector<std::string>&);
   friend std::string invoke_delete_checkpoint(GdbServer&, Task*,
                                               const std::vector<std::string>&);
+  friend std::string quick_seek_ticks(GdbServer&, Task*,
+                                              const std::vector<std::string>&);
   friend std::string invoke_compare_checkpoints(GdbServer&, Task*,
                                               const std::vector<std::string>&);
   friend std::string invoke_info_checkpoints(GdbServer&, Task*,
@@ -115,6 +117,7 @@ private:
                                  ReportState state);
   void activate_debugger();
   void restart_session(const GdbRequest& req);
+  FrameTime compute_time_from_ticks(ReplayTimeline& timeline, Ticks target);
   GdbRequest process_debugger_requests(ReportState state = REPORT_NORMAL);
   enum ContinueOrStop { CONTINUE_DEBUGGING, STOP_DEBUGGING };
   bool detach_or_restart(const GdbRequest& req, ContinueOrStop* s);

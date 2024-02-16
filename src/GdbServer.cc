@@ -1656,7 +1656,7 @@ void GdbServer::activate_debugger() {
   }
 }
 
-static FrameTime compute_time_from_ticks(ReplayTimeline& timeline, Ticks target) {
+FrameTime GdbServer::compute_time_from_ticks(ReplayTimeline& timeline, Ticks target) {
   ReplaySession &session = timeline.current_session();
   Task* task = session.current_task();
   FrameTime current_time = session.current_frame_time();
