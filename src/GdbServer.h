@@ -28,6 +28,8 @@ class GdbServer {
                                        const std::vector<std::string>&);
   friend std::string invoke_delete_checkpoint(GdbServer&, Task*,
                                               const std::vector<std::string>&);
+  friend std::string invoke_compare_checkpoints(GdbServer&, Task*,
+                                              const std::vector<std::string>&);
   friend std::string invoke_info_checkpoints(GdbServer&, Task*,
                                              const std::vector<std::string>&);
 

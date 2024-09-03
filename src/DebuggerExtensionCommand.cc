@@ -174,6 +174,40 @@ static SimpleDebuggerExtensionCommand delete_checkpoint(
   "remove a checkpoint created with the 'checkpoint' command",
   invoke_delete_checkpoint);
 
+string invoke_compare_checkpoints(GdbServer& gdb_server, Task*,
+                                const vector<string>& args) { 
+  if (args.size() < 2) {
+    return "'compare-checkpoints' requires at least two arguments";
+  }
+  vector<GdbServer::Checkpoint> checkpoints;
+  vector<int> ids;
+  for (size_t i = 0; i < args.size(); i++) {
+    int id = stoi(args[i]);
+    auto it = gdb_server.checkpoints.find(id);
+    if (it == gdb_server.checkpoints.end()) {
+      return string("No checkpoint number ") + to_string(id) + ".";
+    }
+    ids.push_back(id);
+    checkpoints.push_back(it->second);
+  }
+  auto& left = checkpoints[0].mark;
+  
+  std::stringstream ss;
+  ss << "Checkpoint " << ids[0] << " is ";
+  for (size_t i = 1; i < ids.size(); i++) {
+    auto& right = checkpoints[i].mark;
+    if (i!=1) ss << ", ";
+    ss << (left==right ? "equal to " : left<right ? "before " : "after ");
+    ss << ids[i];
+  }
+  ss << ".";
+  return ss.str();
+}
+static SimpleDebuggerExtensionCommand compare_checkpoints(
+  "compare-checkpoints",
+  "compare the time of the first checkpoint with the rest",
+  invoke_compare_checkpoints);
+
 string invoke_info_checkpoints(GdbServer& gdb_server, Task*,
                                const vector<string>&) {
   if (gdb_server.checkpoints.size() == 0) {
